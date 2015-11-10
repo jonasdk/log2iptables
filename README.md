@@ -35,7 +35,7 @@ Set limit match to: 5
 Done.
 ```
 
-**Automatic drop Nmap Scan**
+### Automatic drop Nmap Scan
 For automatic drop Nmap SYN scan, i've configured my iptables with following rule:
 ```
 iptables -I INPUT -p tcp -m multiport --dports 23,79 -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG SYN -m limit --limit 3/min -j LOG --log-prefix "PortScan SYN>"
