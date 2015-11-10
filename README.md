@@ -9,7 +9,7 @@ By a simple regular expression match, you can parse any logfile type and take an
 ```
 - `-f `  Log file to read (ex: /var/log/auth.log)
 - `-r `  Regular Expression (ex: `"(F|f)ail.*([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)"`)
-- **-p**  IP Address group number (on example regex before: 2)
-- **-l**  How many times the regex must match (ex: 5)
-- **-a**  IPTables Action (the iptables -j argument, ex: DROP)
-- **-i**  IPTables insert (I) or append (A) mode (ex: A)
+- `-p `  IP Address group number (on example regex before: 2)
+- `-l `  How many times the regex must match (ex: 5)
+- `-a `  IPTables Action (the iptables -j argument, ex: DROP)
+- `-i `  IPTables insert (I) or append (A) mode (ex: A)
