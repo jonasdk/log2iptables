@@ -15,6 +15,7 @@ By a simple regular expression match, you can parse any logfile type and take an
 - `-i `  IPTables insert (I) or append (A) mode (ex: A)
 
 ## Examples
+### Automaitc drop SSH Bruteforce
 i use this script for automatic response against SSH bruteforce, and for block Nmap SYN/TCP scan. The first example relates SSH logs, with a regular expression that search for failed login:
 ```bash
 ./log2iptables.sh -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5
