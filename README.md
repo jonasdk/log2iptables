@@ -1,4 +1,4 @@
-# log2iptables
+# log2iptables 1.3.1
 log2iptables is a Bash script that parse a log file and execute iptables command. Useful for automatically block an IP address against bruteforce or port scan activities.
 
 By a simple regular expression match, you can parse any logfile type and take an action on iptables. For example, with log2iptables you can: Search for all logs in /var/log/myssh.log that match "Failed password.* ([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)" more that 5 times, and then block the ipaddress with iptables with action DROP.
@@ -302,3 +302,17 @@ Set limit match to: 1
 Done.
 ```
 Obviously here the output is more verbose.
+
+
+## TODO
+- `[high  ]` Send mail with log2iptables output
+- `[medium]` HTTP POST ip list to URL
+- `[low   ]` HTML Output
+every contribution is welcome :)
+
+## Contact
+```
+Andrea (aka theMiddle)
+https://waf.blue
+theMiddle@waf.blue
+```
