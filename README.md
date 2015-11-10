@@ -15,6 +15,7 @@ By a simple regular expression match, you can parse any logfile type and take an
 - `-i `  IPTables insert (I) or append (A) mode (ex: A)
 
 ## Example
+i use this script for automatic response against SSH bruteforce, and for block nmap SYN/TCP scan. The first example relates SSH logs:
 ```bash
 ./log2iptables.sh -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5
 
