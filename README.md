@@ -44,7 +44,7 @@ Set limit match to: 5
 Done.
 ```
 
-if you want to test the script without add any rules to iptables, you can run log2iptables with the `-x 0` argument:
+If you neet to test the script, or the regular expression, without add any rules to iptables, you can run log2iptables with the `-x 0` argument:
 ```bash
 ./log2iptables.sh -x 0 -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5
 ```
