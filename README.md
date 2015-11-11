@@ -211,7 +211,7 @@ curl -d "text=hey Andrea... i am your father&chat_id=123456" "https://api.telegr
 ```
 
 ### Notify on iptables command execution using Telegram
-when log2iptables adds a rule on iptables, it can notify the event to your phone via Telegram.
+When log2iptables adds a rule on iptables, it can notify the event to your phone via Telegram.
 For doing that, you need the -t 1, -T and -C arguments that means:
 - `-t 1       ` Active notification using Telegram
 - `-T <token> ` Set the Telegram Bot Token
