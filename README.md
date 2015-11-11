@@ -10,6 +10,9 @@ Why a Bash script?
 ## Index
 - [Usage](#usage)
 - [Examples](#examples)
+- [Drop SSH Bruteforce](#automaitc-drop-ssh-bruteforce)
+- [Drop Nmap Port Scan](#automatic-drop-nmap-scan)
+- [Drop Bot/Scan reading Nginx logs](#nginx-drop-scan--bot)
 - [Crontab](#crontab)
 - [Notify via HTTP](#send-notification-via-http-post)
 - [Use Telegram](#use-telegram-bot)
