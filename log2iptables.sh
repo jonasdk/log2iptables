@@ -174,7 +174,7 @@ for s in "${!iparrhash[@]}"; do
 		if [ $iptabout -gt 0 ]; then
 			echo -e "   \`-- [${COL1}Skip ${COL0}] $s already present in iptables."
 		else
-			${biniptables} -${IPTABLESINSERT} ${IPTABLESCHAIN} -s ${s} -j ${IPTABLESACTION}
+			# ${biniptables} -${IPTABLESINSERT} ${IPTABLESCHAIN} -s ${s} -j ${IPTABLESACTION}
 			echo -e "   \`-- [${COL3}Add ${COL0}] Add IP $s to iptables (-j ${IPTABLESACTION})"
 			addedip["${s}"]=1;
 			somethinghappens=1;
@@ -203,7 +203,7 @@ if [ $somethinghappens -eq 1 ]; then
 
 	if [ $SENDTELEGRAM -eq 1 ]; then
 		echo -e "[${COL1}Send ${COL0}] message from your Telegram bot."
-		${bincurl} -s -d "text=Hi%2C log2iptables has added the following IP to iptables%3A ${telegramout}on system *${shostname}* %28${sallipadd}%29&chat_id=${TELEGRAMCHATID}" "https://api.telegram.org/bot${TELEGRAMBOTTOKEN}/sendMessage" > /dev/null
+		${bincurl} -s -d "text=Hi%2C log2iptables has added the following IP to iptables%3A ${telegramout}on system *${shostname}* %28${sallipadd}%29 found it in ${LOGFILE}&chat_id=${TELEGRAMCHATID}" "https://api.telegram.org/bot${TELEGRAMBOTTOKEN}/sendMessage" > /dev/null
 	fi
 fi
 echo -e "Done.\n";
