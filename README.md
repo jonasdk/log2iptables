@@ -165,7 +165,7 @@ Easy way to automatic drop bot or web scan, reading http access log.
 I've a nginx server that store all logs in `/usr/local/nginx/logs/example.com.access`.
 My website is not a Drupal or Wordpress installation, but i receive daily requests for
 pages like: wp-login, wp-admin, install.php, xmlrpc.php, etc... that does not exists (404).
-With log2iptables i can drop it by run:
+With log2iptables i can drop it by runing:
 ```bash
 ./log2iptables.sh -x 1 -f /usr/local/nginx/logs/example.com.access -r "([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+) .*GET \/(wp\-|admin|install|setup|xmlrpc).* 404 " -p 1 -l 1
 ```
