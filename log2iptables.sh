@@ -174,7 +174,7 @@ for s in "${!iparrhash[@]}"; do
 		if [ $iptabout -gt 0 ]; then
 			echo -e "   \`-- [${COL1}Skip ${COL0}] $s already present in iptables."
 		else
-			# ${biniptables} -${IPTABLESINSERT} ${IPTABLESCHAIN} -s ${s} -j ${IPTABLESACTION}
+			${biniptables} -${IPTABLESINSERT} ${IPTABLESCHAIN} -s ${s} -j ${IPTABLESACTION}
 			echo -e "   \`-- [${COL3}Add ${COL0}] Add IP $s to iptables (-j ${IPTABLESACTION})"
 			addedip["${s}"]=1;
 			somethinghappens=1;
