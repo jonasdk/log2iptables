@@ -224,14 +224,14 @@ The command will be something like the following:
 the result is:
 ![screenshot](https://waf.blue/img/TelegramScreenshot.jpg)
 
-## TODO
-- `[high  ]` Send mail with log2iptables output
-- `[high  ]` ~~Send Telegram notification (using telegram bot)~~ done v1.4
-- `[high  ]` Optional port and protocol on iptables command
-- `[high  ]` ~~Set -x 0 as default~~ (tnx yuredd) done v1.5
-- `[medium]` save iptables configuration and restore at boot (tnx yuredd)
-- `[medium]` ~~HTTP POST ip list to URL~~ done v1.5
-- `[low   ]` HTML Output
+## TODO List
+- 2015-11-11 `[high  ]` ~~Send Telegram notification (using telegram bot)~~ done v1.4
+- 2015-11-11 `[high  ]` ~~Set -x 0 as default~~ (tnx yuredd) done v1.5
+- 2015-11-11 `[medium]` save iptables configuration and restore at boot (tnx yuredd)
+- 2015-11-10 `[medium]` ~~HTTP POST ip list to URL~~ done v1.5
+- 2015-11-09 `[high  ]` Send mail with log2iptables output
+- 2015-11-09 `[high  ]` Optional port and protocol on iptables command
+- 2015-11-09 `[low   ]` HTML Output
 
 all contribution are welcome :)
 
