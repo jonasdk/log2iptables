@@ -133,6 +133,7 @@ Anyway, I've the following configuration:
 
 ## TODO
 - `[high  ]` Send mail with log2iptables output
+- `[high  ]` Send Telegram notification (using telegram bot)
 - `[high  ]` Optional port and protocol on iptables command
 - `[medium]` HTTP POST ip list to URL
 - `[low   ]` HTML Output
