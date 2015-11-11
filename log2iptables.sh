@@ -43,6 +43,13 @@ IPTABLESCHAIN="INPUT";
 # A = append
 IPTABLESINSERT="I";
 
+# Enable / Disable iptables execution
+# for example you can disable the iptables execution
+# and test the script
+# 1=on
+# 0=off
+IPTABLESEXEC=1;
+
 # send Telegram notification
 # more information at https://core.telegram.org/bots/api
 # useful tutorial on how to create a telegram bot
@@ -65,7 +72,7 @@ bincolumn=$(which column);
 shostname=$(hostname);
 sallipadd=$(hostname --all-ip-addresses);
 
-while getopts :hf:r:p:l:a:i:c:t:T:C: OPTION; do
+while getopts :hf:r:p:l:a:i:c:t:T:C:x: OPTION; do
 	case $OPTION in
 		f)
 			echo "Reading log file: ${OPTARG}";
@@ -107,6 +114,10 @@ while getopts :hf:r:p:l:a:i:c:t:T:C: OPTION; do
 			echo "Telegram Chat ID: ${OPTARG}"
 			TELEGRAMCHATID=$OPTARG;
 		;;
+		x)
+			echo "Execute iptables command: ${OPTARG}"
+			IPTABLESEXEC=$OPTARG;
+		;;
 		h)
 			echo "Usage: ${0} -f <logfile> [rplaic]"
 			echo ""
@@ -114,6 +125,7 @@ while getopts :hf:r:p:l:a:i:c:t:T:C: OPTION; do
 			echo "-r   Regular Expression (ex: \"(F|f)ail.*([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\")"
 			echo "-p   IP Address group number (on example regex before: 2)"
 			echo "-l   How many times the regex must match (default: 5)"
+			echo "-x   Execute IPTables command 1=enable 0=disable (default: 1)"
 			echo "-a   IPTables Action (the iptables -j argument, default: DROP)"
 			echo "-i   IPTables insert (I) or append (A) mode (default: I)"
 			echo "-c   IPTables chain like INPUT, OUTPUT, etc... (default: INPUT)"
@@ -174,7 +186,9 @@ for s in "${!iparrhash[@]}"; do
 		if [ $iptabout -gt 0 ]; then
 			echo -e "   \`-- [${COL1}Skip ${COL0}] $s already present in iptables."
 		else
-			${biniptables} -${IPTABLESINSERT} ${IPTABLESCHAIN} -s ${s} -j ${IPTABLESACTION}
+			if [ $IPTABLESEXEC -eq 1 ]; then
+				${biniptables} -${IPTABLESINSERT} ${IPTABLESCHAIN} -s ${s} -j ${IPTABLESACTION}
+			fi
 			echo -e "   \`-- [${COL3}Add ${COL0}] Add IP $s to iptables (-j ${IPTABLESACTION})"
 			addedip["${s}"]=1;
 			somethinghappens=1;

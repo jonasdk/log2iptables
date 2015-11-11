@@ -14,6 +14,7 @@ Why a Bash script?
 - `-r `  Regular Expression (ex: `"(F|f)ail.*([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)"`)
 - `-p `  IP Address group number (on example regex before: 2)
 - `-l `  How many times the regex must match (default: 5)
+- `-x `  Execute IPTables command 1=enable 0=disable (default: 1)
 - `-a `  IPTables Action (`the iptables -j argument, default: DROP`)
 - `-i `  IPTables insert (I) or append (A) mode (default: I)
 - `-c `  IPTables chain like INPUT, OUTPUT, etc... (default: INPUT)
@@ -42,6 +43,12 @@ Set limit match to: 5
 +
 Done.
 ```
+
+if you want to test the script without add any rules to iptables, you can execute the script with the `-x 0` argument:
+```bash
+./log2iptables.sh -x 0 -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5
+```
+
 
 ### Automatic drop Nmap Scan
 For automatic drop Nmap SYN scan, i've configured my iptables with the following rule:
