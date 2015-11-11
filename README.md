@@ -181,6 +181,7 @@ the result is:
 - `[high  ]` Send mail with log2iptables output
 - `[high  ]` ~~Send Telegram notification (using telegram bot)~~ done on 1.4!
 - `[high  ]` Optional port and protocol on iptables command
+- `[medium]` save iptables configuration and restore at boot (tnx youredd)
 - `[medium]` HTTP POST ip list to URL
 - `[low   ]` HTML Output
 
