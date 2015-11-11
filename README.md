@@ -10,6 +10,7 @@ Why a Bash script?
 - [Usage](#usage)
 - [Examples](#examples)
 - [Crontab](#crontab)
+- [Notify via HTTP](#send-notification-via-http-post)
 - [Use Telegram](#use-telegram-bot)
 - [TODO](#todo)
 - [Contact](#contact)
@@ -164,6 +165,7 @@ You can enable the HTTP POST function that send all ip addresses found to a spec
 this PHP script will receive a POST request with the following parameters:
 ```php
 print_r($_POST);
+
 Array (
 	[ipaddresses] = '10.2.3.4, 10.5.6.7, 10.8.9.10',
 	[logfile] = '/var/log/auth.log',
