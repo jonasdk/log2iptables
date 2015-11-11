@@ -138,8 +138,9 @@ while getopts :hf:r:p:l:a:i:c:t:T:C:x:u:U:H: OPTION; do
 			HTTPHEADERS=$OPTARG;
 		;;
 		h)
-			echo "Usage: ${0} -f <logfile> [rplaic]"
+			echo "Usage: ${0} -x [0|1] -f <logfile> [rplaic]"
 			echo ""
+			echo "-h   This help"
 			echo "-f   Log file to read (default: /var/log/auth.log)"
 			echo "-r   Regular Expression (ex: \"(F|f)ail.*([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\")"
 			echo "-p   IP Address group number (on example regex before: 2)"
