@@ -6,6 +6,7 @@ By a simple regular expression match, you can parse any logfile type and take an
 Why a Bash script?
 > simple is better. no deps, no installation, no fucking boring things. just run it in crontab :)
 
+
 ## Index
 - [Usage](#usage)
 - [Examples](#examples)
@@ -14,6 +15,7 @@ Why a Bash script?
 - [Use Telegram](#use-telegram-bot)
 - [TODO](#todo)
 - [Contact](#contact)
+
 
 ## Usage
 ```
@@ -36,7 +38,10 @@ Why a Bash script?
 - `-T `  Set Telegram bot Token
 - `-C `  Set Telegram Chat ID
 
+
 ## Examples
+
+
 ### Automaitc drop SSH Bruteforce
 i use this script for automatic response against SSH bruteforce, and for block Nmap SYN/TCP scan. The first example relates SSH logs, with a regular expression that search for failed login:
 ```bash
@@ -63,6 +68,9 @@ If you neet to test the script, or the regular expression, without add any rules
 ./log2iptables.sh -x 0 -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5
 ```
 with `-x 0` argument, log2iptables will **not** run the iptables command.
+
+
+
 
 ### Automatic drop Nmap Scan
 For automatic drop Nmap SYN scan, i've configured my iptables with the following rule:
@@ -146,6 +154,19 @@ Set limit match to: 1
 Done.
 ```
 Obviously, here the output is more verbose.
+
+
+
+### Nginx drop scan / bot
+Easy way to automatic drop bot or web scan, reading http access log.
+I've a nginx server that store all logs in `/usr/local/nginx/logs/example.com.access`.
+My website is not a Drupal or Wordpress installation, but i receive daily requests for
+pages like: wp-login, wp-admin, install.php, xmlrpc.php, etc... that does not exists (404).
+With log2iptables i can drop it by run:
+```bash
+./log2iptables.sh -x 1 -f /usr/local/nginx/logs/example.com.access -r "([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+) .*GET \/(wp\-|admin|install|setup|xmlrpc).* 404 " -p 1 -l 1
+```
+
 
 ## Crontab
 I don't know which is the better way to run this script in crontab.
