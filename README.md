@@ -48,7 +48,7 @@ If you neet to test the script, or the regular expression, without add any rules
 ```bash
 ./log2iptables.sh -x 0 -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5
 ```
-
+with `-x 0` argument, log2iptables will **not** run the iptables command.
 
 ### Automatic drop Nmap Scan
 For automatic drop Nmap SYN scan, i've configured my iptables with the following rule:
