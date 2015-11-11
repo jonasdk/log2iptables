@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # log2iptables
-# version 1.4
 
 # log2iptables is a Bash script that parse a log file
 # and execute iptables command. Useful for automatically
@@ -11,6 +10,7 @@
 # https://github.com/theMiddleBlue/log2iptables
 # Author: Andrea (aka theMiddle) Menin
 #
+VERSION="1.5";
 
 # -- CONFIG default value --
 #
@@ -48,7 +48,7 @@ IPTABLESINSERT="I";
 # and test the script
 # 1=on
 # 0=off
-IPTABLESEXEC=1;
+IPTABLESEXEC=0;
 
 # send Telegram notification
 # more information at https://core.telegram.org/bots/api
@@ -57,6 +57,13 @@ IPTABLESEXEC=1;
 SENDTELEGRAM=0;
 TELEGRAMBOTTOKEN="<your telegram bot token here>";
 TELEGRAMCHATID="<your chat id here>";
+
+# send HTTP POST request
+# to a specific url, with all ip found
+# and other informations.
+SENDHTTP=0;
+HTTPURL="http://yourwebsite/log2iptables.php";
+HTTPHEADERS="X-Custom-Header: foo\nX-Another-Param: bar"
 
 #
 # -- END CONFIG --
@@ -72,7 +79,7 @@ bincolumn=$(which column);
 shostname=$(hostname);
 sallipadd=$(hostname --all-ip-addresses);
 
-while getopts :hf:r:p:l:a:i:c:t:T:C:x: OPTION; do
+while getopts :hf:r:p:l:a:i:c:t:T:C:x:u:U:H: OPTION; do
 	case $OPTION in
 		f)
 			echo "Reading log file: ${OPTARG}";
@@ -118,6 +125,18 @@ while getopts :hf:r:p:l:a:i:c:t:T:C:x: OPTION; do
 			echo "Execute iptables command: ${OPTARG}"
 			IPTABLESEXEC=$OPTARG;
 		;;
+		u)
+			echo "Enable send HTTP POST request: ${OPTARG}"
+			SENDHTTP=$OPTARG;
+		;;
+		U)
+			echo "Destination URL: ${OPTARG}"
+			HTTPURL=$OPTARG;
+		;;
+		H)
+			echo "Additional Header parameters: ${OPTARG}"
+			HTTPHEADERS=$OPTARG;
+		;;
 		h)
 			echo "Usage: ${0} -f <logfile> [rplaic]"
 			echo ""
@@ -125,10 +144,17 @@ while getopts :hf:r:p:l:a:i:c:t:T:C:x: OPTION; do
 			echo "-r   Regular Expression (ex: \"(F|f)ail.*([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\")"
 			echo "-p   IP Address group number (on example regex before: 2)"
 			echo "-l   How many times the regex must match (default: 5)"
-			echo "-x   Execute IPTables command 1=enable 0=disable (default: 1)"
+			echo "-x   Execute IPTables command 1=enable 0=disable (default: 0)"
 			echo "-a   IPTables Action (the iptables -j argument, default: DROP)"
 			echo "-i   IPTables insert (I) or append (A) mode (default: I)"
 			echo "-c   IPTables chain like INPUT, OUTPUT, etc... (default: INPUT)"
+			echo ""
+			echo "HTTP Functions:"
+			echo "-u   Enable send HTTP POST request with all ip found 1=on 0=off (default: 0)"
+			echo "-U   Destination URL (example: http://myserver/myscript.php)"
+			echo "-H   Header parameters to send with curl (optional)"
+			echo ""
+			echo "Telegram Functions:"
 			echo "-t   Send Telegram msg on iptables command 0=off, 1=on (default: 0)"
 			echo "-T   Set Telegram bot Token"
 			echo "-C   Set Telegram Chat ID"
@@ -139,7 +165,13 @@ while getopts :hf:r:p:l:a:i:c:t:T:C:x: OPTION; do
 		;;
 	esac
 done
+
+if [ $IPTABLESEXEC -eq 0 ]; then
+	echo -e "\nWARNING: log2iptables started in test mode.\nNo rules will be created on iptables.\nEnable production mode with: -x 1"
+fi
+
 echo ""
+
 
 declare -A iparrhash;
 declare -A addedip;
@@ -219,5 +251,11 @@ if [ $somethinghappens -eq 1 ]; then
 		echo -e "[${COL1}Send ${COL0}] message from your Telegram bot."
 		${bincurl} -s -d "text=Hi%2C log2iptables has added the following IP to iptables%3A ${telegramout}on system *${shostname}* %28${sallipadd}%29 found it in ${LOGFILE}&chat_id=${TELEGRAMCHATID}" "https://api.telegram.org/bot${TELEGRAMBOTTOKEN}/sendMessage" > /dev/null
 	fi
+
+	if [ $SENDHTTP -eq 1 ]; then
+		echo -e "[${COL1}Send ${COL0}] http post request with curl."
+		${bincurl} -s -d "ipaddresses=${telegramout}&logfile=${LOGFILE}&system=${shostname}" -A "log2iptables ${VERSION} (https://github.com/theMiddleBlue/log2iptables)" -H "${HTTPHEADERS}" "${HTTPURL}" > /dev/null
+	fi
+
 fi
 echo -e "Done.\n";

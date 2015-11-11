@@ -1,4 +1,4 @@
-# log2iptables 1.4
+# log2iptables 1.5
 log2iptables is a Bash script that parse a log file and execute iptables command. Useful for automatically block an IP address against bruteforce or port scan activities.
 
 By a simple regular expression match, you can parse any logfile type and take an action on iptables. For example, with log2iptables you can: Search for all logs in /var/log/myssh.log that match "Failed password.* ([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)" more that 5 times, and then block the ipaddress with iptables with action DROP.
@@ -26,6 +26,13 @@ Why a Bash script?
 - `-a `  IPTables Action (`the iptables -j argument, default: DROP`)
 - `-i `  IPTables insert (I) or append (A) mode (default: I)
 - `-c `  IPTables chain like INPUT, OUTPUT, etc... (default: INPUT)
+-
+- HTTP Functions;
+- `-u `  Enable send HTTP POST request with all ip found 1=on 0=off (default: 0)
+- `-U `  Destination URL (example: `http://myserver/myscript.php`)
+- `-H `  Header parameters to send with curl (optional)
+-
+- Telegram Functions:
 - `-t `  Send Telegram msg on iptables command 0=off, 1=on (default: 0)
 - `-T `  Set Telegram bot Token
 - `-C `  Set Telegram Chat ID
@@ -34,7 +41,7 @@ Why a Bash script?
 ### Automaitc drop SSH Bruteforce
 i use this script for automatic response against SSH bruteforce, and for block Nmap SYN/TCP scan. The first example relates SSH logs, with a regular expression that search for failed login:
 ```bash
-./log2iptables.sh -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5
+./log2iptables.sh -x 1 -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5
 
 Reading log file: /var/log/auth.log
 Using regex: sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})
@@ -66,7 +73,7 @@ iptables -I INPUT -p tcp -m multiport --dports 23,79 -m tcp --tcp-flags FIN,SYN,
 
 in my environment, this rule write a log in /var/log/syslog every time someone scan my server (something like: nmap -sS myserver). I've put in crontab log2iptables with the following arguments:
 ```bash
-./log2iptables.sh -f /var/log/syslog -r "PortScan.*SRC\=([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)" -p 1 -l 1
+./log2iptables.sh -x 1 -f /var/log/syslog -r "PortScan.*SRC\=([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)" -p 1 -l 1
 
 Reading log file: /var/log/syslog
 Using regex: PortScan.*SRC\=([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)
@@ -145,8 +152,23 @@ Obviously, here the output is more verbose.
 I don't know which is the better way to run this script in crontab.
 Anyway, I've the following configuration:
 ```
-*/5 * * * * /usr/local/bin/log2iptables.sh -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5 > /dev/null 2>&1
-*/1 * * * * /usr/local/bin/log2iptables.sh -f /var/log/syslog -r "PortScan.*SRC\=([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)" -p 1 -l 1 > /dev/null 2>&1
+*/5 * * * * /usr/local/bin/log2iptables.sh -x 1 -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5 > /dev/null 2>&1
+*/1 * * * * /usr/local/bin/log2iptables.sh -x 1 -f /var/log/syslog -r "PortScan.*SRC\=([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)" -p 1 -l 1 > /dev/null 2>&1
+```
+
+## Send notification via HTTP POST
+You can enable the HTTP POST function that send all ip addresses found to a specific URL with a POST request using curl. For example:
+```bash
+./log2iptables.sh -f /var/log/auth.log.2 -u 1 -U "http://www.mywebsite.com/log2ip.php"
+```
+this PHP script will receive a POST request with the following parameters:
+```php
+print_r($_POST);
+Array (
+	[ipaddresses] = '10.2.3.4, 10.5.6.7, 10.8.9.10',
+	[logfile] = '/var/log/auth.log',
+	[system] = 'mylocalhost.domain'
+)
 ```
 
 ## Use Telegram Bot
@@ -172,17 +194,18 @@ When you run log2iptables you can specify the -t 1, -T and -C arguments that mea
 
 The command will be something like the following:
 ```
-./log2iptables.sh -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5 -t 1 -T "myTokenBlablabla" -C "123456"
+./log2iptables.sh -x 1 -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5 -t 1 -T "myTokenBlablabla" -C "123456"
 ```
 the result is:
 ![screenshot](https://waf.blue/img/TelegramScreenshot.jpg)
 
 ## TODO
 - `[high  ]` Send mail with log2iptables output
-- `[high  ]` ~~Send Telegram notification (using telegram bot)~~ done on 1.4!
+- `[high  ]` ~~Send Telegram notification (using telegram bot)~~ done v1.4
 - `[high  ]` Optional port and protocol on iptables command
+- `[high  ]` ~~Set -x 0 as default~~ (tnx yuredd) done v1.5
 - `[medium]` save iptables configuration and restore at boot (tnx yuredd)
-- `[medium]` HTTP POST ip list to URL
+- `[medium]` ~~HTTP POST ip list to URL~~ done v1.5
 - `[low   ]` HTML Output
 
 all contribution are welcome :)
