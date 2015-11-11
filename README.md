@@ -40,12 +40,12 @@ Done.
 ```
 
 ### Automatic drop Nmap Scan
-For automatic drop Nmap SYN scan, i've configured my iptables with following rule:
+For automatic drop Nmap SYN scan, i've configured my iptables with the following rule:
 ```
 iptables -I INPUT -p tcp -m multiport --dports 23,79 -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG SYN -m limit --limit 3/min -j LOG --log-prefix "PortScan SYN>"
 ```
 
-in my environment, this rule write a log in /var/log/syslog every time someone scan my server (something like: nmap -sS myserver). I've put in crontab log2iptables with following arguments:
+in my environment, this rule write a log in /var/log/syslog every time someone scan my server (something like: nmap -sS myserver). I've put in crontab log2iptables with the following arguments:
 ```bash
 ./log2iptables.sh -f /var/log/syslog -r "PortScan.*SRC\=([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)" -p 1 -l 1
 
@@ -134,7 +134,8 @@ Anyway, I've the following configuration:
 - `[high  ]` Send mail with log2iptables output
 - `[medium]` HTTP POST ip list to URL
 - `[low   ]` HTML Output
-every contribution is welcome :)
+
+all contribution are welcome :)
 
 ## Contact
 ```
