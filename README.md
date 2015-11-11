@@ -10,12 +10,13 @@ Why a Bash script?
 ```
 ./log2iptables -h
 ```
-- `-f `  Log file to read (ex: `/var/log/auth.log`)
+- `-f `  Log file to read (default: `/var/log/auth.log`)
 - `-r `  Regular Expression (ex: `"(F|f)ail.*([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)"`)
 - `-p `  IP Address group number (on example regex before: 2)
-- `-l `  How many times the regex must match (ex: 5)
-- `-a `  IPTables Action (`the iptables -j argument, ex: DROP`)
-- `-i `  IPTables insert (I) or append (A) mode (ex: A)
+- `-l `  How many times the regex must match (default: 5)
+- `-a `  IPTables Action (`the iptables -j argument, default: DROP`)
+- `-i `  IPTables insert (I) or append (A) mode (default: I)
+- `-c `  IPTables chain like INPUT, OUTPUT, etc... (default: INPUT)
 
 ## Examples
 ### Automaitc drop SSH Bruteforce
@@ -132,6 +133,7 @@ Anyway, I've the following configuration:
 
 ## TODO
 - `[high  ]` Send mail with log2iptables output
+- `[high  ]` Optional port and protocol on iptables command
 - `[medium]` HTTP POST ip list to URL
 - `[low   ]` HTML Output
 
