@@ -120,7 +120,7 @@ Set limit match to: 1
 +
 Done.
 ```
-Obviously here the output is more verbose.
+Obviously, here the output is more verbose.
 
 ## Crontab
 I don't know which is the better way to run this script in crontab.
