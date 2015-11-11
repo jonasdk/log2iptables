@@ -3,6 +3,9 @@ log2iptables is a Bash script that parse a log file and execute iptables command
 
 By a simple regular expression match, you can parse any logfile type and take an action on iptables. For example, with log2iptables you can: Search for all logs in /var/log/myssh.log that match "Failed password.* ([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)" more that 5 times, and then block the ipaddress with iptables with action DROP.
 
+Why a Bash script?
+simple is better. no deps, no installation, no fucking boring things. just run it in crontab :)
+
 ## Usage
 ```
 ./log2iptables -h
@@ -119,6 +122,13 @@ Done.
 ```
 Obviously here the output is more verbose.
 
+## Crontab
+i don't know which is the better way to insert this script in crontab.
+I've the following configuration:
+```
+*/5 * * * * /usr/local/bin/log2iptables.sh -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5 > /dev/null 2>&1
+*/1 * * * * /usr/local/bin/log2iptables.sh -f /var/log/syslog -r "PortScan.*SRC\=([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)" -p 1 -l 1 > /dev/null 2>&1
+```
 
 ## TODO
 - `[high  ]` Send mail with log2iptables output
