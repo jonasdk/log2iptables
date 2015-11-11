@@ -1,4 +1,4 @@
-# log2iptables 1.3.1
+# log2iptables 1.4
 log2iptables is a Bash script that parse a log file and execute iptables command. Useful for automatically block an IP address against bruteforce or port scan activities.
 
 By a simple regular expression match, you can parse any logfile type and take an action on iptables. For example, with log2iptables you can: Search for all logs in /var/log/myssh.log that match "Failed password.* ([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)" more that 5 times, and then block the ipaddress with iptables with action DROP.
@@ -17,6 +17,9 @@ Why a Bash script?
 - `-a `  IPTables Action (`the iptables -j argument, default: DROP`)
 - `-i `  IPTables insert (I) or append (A) mode (default: I)
 - `-c `  IPTables chain like INPUT, OUTPUT, etc... (default: INPUT)
+- `-t `  Send Telegram msg on iptables command 0=off, 1=on (default: 0)
+- `-T `  Set Telegram bot Token
+- `-C `  Set Telegram Chat ID
 
 ## Examples
 ### Automaitc drop SSH Bruteforce
@@ -131,9 +134,37 @@ Anyway, I've the following configuration:
 */1 * * * * /usr/local/bin/log2iptables.sh -f /var/log/syslog -r "PortScan.*SRC\=([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)" -p 1 -l 1 > /dev/null 2>&1
 ```
 
+## Use Telegram Bot
+Now you can send a text message to your phone, using Telegram, when log2iptables execute the iptables command. This is possible by using the Telegram Bot API. For more information see https://core.telegram.org/bots/api or this useful tutorial http://unnikked.ga/getting-started-with-telegram-bots/ on how to get a bot Token.
+
+Anyway, i've created a new Telegram Bot just visiting https://telegram.me/botfather and then i've open a chat with my bot. Then i've get the Chat ID with curl, like this:
+```bash
+curl "https://api.telegram.org/bot<token>/getUpdates"
+
+{"ok":true,"result":[{"update_id":xxxxx,
+"message":{"message_id":1,"from":{"id":xxxxx,"first_name":"Andrea","last_name":"Menin","username":"theMiddle"},"chat":{"id":123456,"first_name":"Andrea","last_name":"Menin","username":"theMiddle","type":"private"},"date":xxxxxxx,"text":"\/start"}}]}
+```
+The JSON output include my Chat ID: 123456 (fake) and i can use it for send text message from my bot, with something like this:
+```
+curl -d "text=hey Andrea... i am your father&chat_id=123456" "https://api.telegram.org/bot<token>/sendMessage"
+```
+
+### Notify on iptables command execution using Telegram
+When you run log2iptables you can specify the -t 1, -T and -C arguments that means:
+- `-t 1       ` Active notification using Telegram
+- `-T <token> ` Set the Telegram Bot Token
+- `-C <chatid>` Set the Telegram Chat ID
+
+The command will be something like the following:
+```
+./log2iptables.sh -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5 -t 1 -T "myTokenBlablabla" -C "123456"
+```
+the result is:
+![screenshot](https://waf.blue/img/TelegramScreenshot.jpg)
+
 ## TODO
 - `[high  ]` Send mail with log2iptables output
-- `[high  ]` Send Telegram notification (using telegram bot)
+- `[high  ]` ~~Send Telegram notification (using telegram bot)~~ done on 1.4!
 - `[high  ]` Optional port and protocol on iptables command
 - `[medium]` HTTP POST ip list to URL
 - `[low   ]` HTML Output

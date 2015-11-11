@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # log2iptables
-# version 1.3.1
+# version 1.4
 
 # log2iptables is a Bash script that parse a log file
 # and execute iptables command. Useful for automatically
@@ -43,6 +43,14 @@ IPTABLESCHAIN="INPUT";
 # A = append
 IPTABLESINSERT="I";
 
+# send Telegram notification
+# more information at https://core.telegram.org/bots/api
+# useful tutorial on how to create a telegram bot
+# http://unnikked.ga/getting-started-with-telegram-bots/
+SENDTELEGRAM=0;
+TELEGRAMBOTTOKEN="<your telegram bot token here>";
+TELEGRAMCHATID="<your chat id here>";
+
 #
 # -- END CONFIG --
 
@@ -52,8 +60,12 @@ echo ""
 biniptables=$(which iptables);
 bingrep=$(which grep);
 binwc=$(which wc);
+bincurl=$(which curl);
+bincolumn=$(which column);
+shostname=$(hostname);
+sallipadd=$(hostname --all-ip-addresses);
 
-while getopts :hf:r:p:l:a:i:c: OPTION; do
+while getopts :hf:r:p:l:a:i:c:t:T:C: OPTION; do
 	case $OPTION in
 		f)
 			echo "Reading log file: ${OPTARG}";
@@ -83,6 +95,18 @@ while getopts :hf:r:p:l:a:i:c: OPTION; do
 			echo "Set iptables chain: ${OPTARG}"
 			IPTABLESCHAIN=$OPTARG;
 		;;
+		t)
+			echo "Use Telegram bot: ${OPTARG}"
+			SENDTELEGRAM=$OPTARG;
+		;;
+		T)
+			echo "Telegram bot Token: ${OPTARG}"
+			TELEGRAMBOTTOKEN=$OPTARG;
+		;;
+		C)
+			echo "Telegram Chat ID: ${OPTARG}"
+			TELEGRAMCHATID=$OPTARG;
+		;;
 		h)
 			echo "Usage: ${0} -f <logfile> [rplaic]"
 			echo ""
@@ -93,6 +117,9 @@ while getopts :hf:r:p:l:a:i:c: OPTION; do
 			echo "-a   IPTables Action (the iptables -j argument, default: DROP)"
 			echo "-i   IPTables insert (I) or append (A) mode (default: I)"
 			echo "-c   IPTables chain like INPUT, OUTPUT, etc... (default: INPUT)"
+			echo "-t   Send Telegram msg on iptables command 0=off, 1=on (default: 0)"
+			echo "-T   Set Telegram bot Token"
+			echo "-C   Set Telegram Chat ID"
 			echo ""
 			echo "examples usage at https://github.com/theMiddleBlue/log2iptables#examples"
 			echo ""
@@ -137,6 +164,7 @@ if [ ${#iparrhash[@]} -eq 0 ]; then
 	exit 0;
 fi
 
+somethinghappens=0;
 for s in "${!iparrhash[@]}"; do
 	if [ ${iparrhash["$s"]} -ge $LIMIT ]; then
 		echo -e "[${COL1}Found${COL0}] $s more then ${LIMIT} times (${iparrhash["$s"]} match)"
@@ -149,24 +177,33 @@ for s in "${!iparrhash[@]}"; do
 			${biniptables} -${IPTABLESINSERT} ${IPTABLESCHAIN} -s ${s} -j ${IPTABLESACTION}
 			echo -e "   \`-- [${COL3}Add ${COL0}] Add IP $s to iptables (-j ${IPTABLESACTION})"
 			addedip["${s}"]=1;
+			somethinghappens=1;
 		fi
 	fi
 done
 
-ipout="";
-echo -e "\n${#addedip[@]} New IP Address(es) added to iptables:";
-echo "+";
-i=1;
-for s in "${!addedip[@]}"; do
-	if [[ "$i" -lt 3 ]]; then
-		ipout="$ipout| $s - "
-		i=`expr $i + 1`;
-	else
-		ipout="$ipout| $s\n";
-		i=1
-	fi
-done
-echo -e "${ipout}" | column -t -s'-'
+if [ $somethinghappens -eq 1 ]; then
+	ipout="";
+	telegramout="";
+	echo -e "\n${#addedip[@]} New IP Address(es) added to iptables:";
+	echo "+";
+	i=1;
+	for s in "${!addedip[@]}"; do
+		telegramout="${telegramout}${s}%2C ";
+		if [[ "$i" -lt 3 ]]; then
+			ipout="$ipout| $s - ";
+			i=`expr $i + 1`;
+		else
+			ipout="$ipout| $s\n";
+			i=1;
+		fi
+	done
+	echo -e "${ipout}" | ${bincolumn} -t -s'-'
+	echo "+";
 
-echo "+";
-echo "Done.";
+	if [ $SENDTELEGRAM -eq 1 ]; then
+		echo -e "[${COL1}Send ${COL0}] message from your Telegram bot."
+		${bincurl} -s -d "text=Hi%2C log2iptables has added the following IP to iptables%3A ${telegramout}on system *${shostname}* %28${sallipadd}%29&chat_id=${TELEGRAMCHATID}" "https://api.telegram.org/bot${TELEGRAMBOTTOKEN}/sendMessage" > /dev/null
+	fi
+fi
+echo -e "Done.\n";
