@@ -1,5 +1,20 @@
 #!/bin/bash
 
+# log2iptables
+# version 1.3.1
+
+# log2iptables is a Bash script that parse a log file
+# and execute iptables command. Useful for automatically
+# block an IP address against bruteforce or port scan activities.
+#
+# Documentation and example usage at:
+# https://github.com/theMiddleBlue/log2iptables
+# Author: Andrea (aka theMiddle) Menin
+#
+
+# -- CONFIG default value --
+#
+
 # Absolute path where ssh log file are stored
 # default /var/log/auth.log
 LOGFILE='/var/log/auth.log';
@@ -29,8 +44,9 @@ IPTABLESCHAIN="INPUT";
 IPTABLESINSERT="I";
 
 #
-# ----------------
 # -- END CONFIG --
+
+
 
 echo ""
 biniptables=$(which iptables);
