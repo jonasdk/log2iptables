@@ -227,7 +227,7 @@ the result is:
 ## TODO List
 - 2015-11-11 `[high  ]` ~~Send Telegram notification (using telegram bot)~~ done v1.4
 - 2015-11-11 `[high  ]` ~~Set -x 0 as default~~ (tnx yuredd) done v1.5
-- 2015-11-11 `[medium]` save iptables configuration and restore at boot (tnx yuredd)
+- 2015-11-11 `[medium]` Save iptables configuration and restore at boot (tnx yuredd)
 - 2015-11-10 `[medium]` ~~HTTP POST ip list to URL~~ done v1.5
 - 2015-11-09 `[high  ]` Send mail with log2iptables output
 - 2015-11-09 `[high  ]` Optional port and protocol on iptables command
