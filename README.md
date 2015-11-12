@@ -47,7 +47,7 @@ Why a Bash script?
 
 ### Automaitc drop SSH Bruteforce
 i use this script for automatic response against SSH bruteforce, and for block Nmap SYN/TCP scan. The first example relates SSH logs, with a regular expression that search for failed login:
-```bash
+```
 ./log2iptables.sh -x 1 -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5
 
 Reading log file: /var/log/auth.log

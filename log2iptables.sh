@@ -171,9 +171,6 @@ if [ $IPTABLESEXEC -eq 0 ]; then
 	echo -e "\nWARNING: log2iptables started in test mode.\nNo rules will be created on iptables.\nEnable production mode with: -x 1"
 fi
 
-echo ""
-
-
 declare -A iparrhash;
 declare -A addedip;
 IPARR=();
@@ -185,6 +182,7 @@ COL3="\e[31m"; # red
 l=0;
 q=0;
 
+echo ""
 while read line; do
 	if [[ ${line} =~ $REGEXP ]]; then
 		addip="1";
