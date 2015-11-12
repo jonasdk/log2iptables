@@ -224,7 +224,7 @@ The command will be something like the following:
 the result is:
 ![screenshot](https://waf.blue/img/TelegramScreenshot.jpg)
 
-## TODO List
+## TODO
 - 2015-11-11 `[high  ]` ~~Send Telegram notification (using telegram bot)~~ done v1.4
 - 2015-11-11 `[high  ]` ~~Set -x 0 as default~~ (tnx yuredd) done v1.5
 - 2015-11-11 `[medium]` Save iptables configuration and restore at boot (tnx yuredd)
