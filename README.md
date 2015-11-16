@@ -181,7 +181,7 @@ Anyway, I've the following configuration:
 */1 * * * * /usr/local/bin/log2iptables.sh -x 1 -f /var/log/syslog -r "PortScan.*SRC\=([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)" -p 1 -l 1 > /dev/null 2>&1
 ```
 
-## Execute command when iptables run
+## Execute command after iptables run
 When log2iptables add new iptables rules, can execute a command.
 You can specify the command with argument -X and you can choose
 how to format the ip address list using IPLISTCSV or IPLIST PIPE.
