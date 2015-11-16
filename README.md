@@ -32,6 +32,8 @@ Why a Bash script?
 - `-a `  IPTables Action (`the iptables -j argument, default: DROP`)
 - `-i `  IPTables insert (I) or append (A) mode (default: I)
 - `-c `  IPTables chain like INPUT, OUTPUT, etc... (default: INPUT)
+- **System Functions:**
+- `-X `  Execute command after add new iptables rules (default: 0)
 - **HTTP Functions:**
 - `-u `  Enable send HTTP POST request with all ip found 1=on 0=off (default: 0)
 - `-U `  Destination URL (example: `http://myserver/myscript.php`)
@@ -179,6 +181,35 @@ Anyway, I've the following configuration:
 */1 * * * * /usr/local/bin/log2iptables.sh -x 1 -f /var/log/syslog -r "PortScan.*SRC\=([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)" -p 1 -l 1 > /dev/null 2>&1
 ```
 
+## Execute command when iptables run
+When log2iptables add new iptables rules, can execute a command.
+You can specify the command with argument -X and you can choose
+how to format the ip address list using IPLISTCSV or IPLIST PIPE.
+For example:
+```
+./log2iptables.sh -f /var/log/messages -r "PortScan.*SRC\=([0-9\.]+)" -p 1 -X "echo IPLISTCSV"
+```
+execute the command "echo" and the string IPLISTCSV will be replaced
+with all ip addresses added on iptables. the output is:
+```
+...
+
+3 New IP Address(es) added to iptables:
++
+| 83.103.171.94    | 46.161.40.37    | 95.213.143.180
++
+
+Executing Command: echo IPLISTCSV
++
+83.103.171.94,46.161.40.37,95.213.143.180
++
+
+Done.
+```
+This is useful if you have to send this information to others applications
+like IPS or Firewall API, WAF API, etc...
+
+
 ## Send notification via HTTP POST
 You can enable the HTTP POST function that send all ip addresses found to a specific URL with a POST request using curl. For example:
 ```bash
@@ -225,6 +256,7 @@ the result is:
 ![screenshot](https://waf.blue/img/TelegramScreenshot.jpg)
 
 ## TODO
+- 2015-11-15 `[high  ]` ~~Execute command on iptables rule add~~ done v1.6
 - 2015-11-11 `[high  ]` ~~Send Telegram notification (using telegram bot)~~ done v1.4
 - 2015-11-11 `[high  ]` ~~Set -x 0 as default~~ (tnx yuredd) done v1.5
 - 2015-11-11 `[medium]` Save iptables configuration and restore at boot (tnx yuredd)

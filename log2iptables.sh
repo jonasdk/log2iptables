@@ -10,7 +10,7 @@
 # https://github.com/theMiddleBlue/log2iptables
 # Author: Andrea (aka theMiddle) Menin
 #
-VERSION="1.5";
+VERSION="1.6";
 
 # -- CONFIG default value --
 #
@@ -65,6 +65,10 @@ SENDHTTP=0;
 HTTPURL="http://yourwebsite/log2iptables.php";
 HTTPHEADERS="X-Custom-Header: foo\nX-Another-Param: bar"
 
+# Execute a command when iptables run
+# 0 = do not execute anything.
+EXECCMD="0";
+
 #
 # -- END CONFIG --
 
@@ -79,7 +83,7 @@ bincolumn=$(which column);
 shostname=$(hostname);
 sallipadd=$(hostname --all-ip-addresses);
 
-while getopts :hf:r:p:l:a:i:c:t:T:C:x:u:U:H: OPTION; do
+while getopts :hf:r:p:l:a:i:c:t:T:C:x:u:U:H:X: OPTION; do
 	case $OPTION in
 		f)
 			echo "Reading log file: ${OPTARG}";
@@ -137,6 +141,10 @@ while getopts :hf:r:p:l:a:i:c:t:T:C:x:u:U:H: OPTION; do
 			echo "Additional Header parameters: ${OPTARG}"
 			HTTPHEADERS=$OPTARG;
 		;;
+		X)
+			echo "Execute command when iptables run: ${OPTARG}"
+			EXECCMD="${OPTARG}";
+		;;
 		h)
 			echo "Usage: ${0} -x [0|1] -f <logfile> [rplaic]"
 			echo ""
@@ -149,6 +157,9 @@ while getopts :hf:r:p:l:a:i:c:t:T:C:x:u:U:H: OPTION; do
 			echo "-a   IPTables Action (the iptables -j argument, default: DROP)"
 			echo "-i   IPTables insert (I) or append (A) mode (default: I)"
 			echo "-c   IPTables chain like INPUT, OUTPUT, etc... (default: INPUT)"
+			echo ""
+			echo "System Functions:"
+			echo "-X   Execute command after new iptables rules added (default: 0)"
 			echo ""
 			echo "HTTP Functions:"
 			echo "-u   Enable send HTTP POST request with all ip found 1=on 0=off (default: 0)"
@@ -230,11 +241,15 @@ done
 if [ $somethinghappens -eq 1 ]; then
 	ipout="";
 	telegramout="";
+	csvout="";
+	pipeout="";
 	echo -e "\n${#addedip[@]} New IP Address(es) added to iptables:";
 	echo "+";
 	i=1;
 	for s in "${!addedip[@]}"; do
 		telegramout="${telegramout}${s}%2C ";
+		csvout="${csvout}${s},";
+		pipeout="${pipeout}${s}|";
 		if [[ "$i" -lt 3 ]]; then
 			ipout="$ipout| $s - ";
 			i=`expr $i + 1`;
@@ -256,5 +271,20 @@ if [ $somethinghappens -eq 1 ]; then
 		${bincurl} -s -d "ipaddresses=${telegramout}&logfile=${LOGFILE}&system=${shostname}" -A "log2iptables ${VERSION} (https://github.com/theMiddleBlue/log2iptables)" -H "${HTTPHEADERS}" "${HTTPURL}" > /dev/null
 	fi
 
+	if [ "$EXECCMD" != 0 ]; then
+		echo -en "\nExecuting Command: ${EXECCMD}\n";
+		echo -en "+\n";
+		if [[ $EXECCMD == *"IPLISTCSV"* ]]; then
+			CMDREPLACE=${EXECCMD//IPLISTCSV/$csvout};
+		elif [[ $EXECCMD == *"IPLISTPIPE"* ]]; then
+			CMDREPLACE=${EXECCMD//IPLISTPIPE/$pipeout};
+		else
+			CMDREPLACE=${EXECCMD};
+		fi
+
+		CMDOUTPUT=`${CMDREPLACE}`;
+		echo $CMDOUTPUT;
+		echo -en "+\n\n";
+	fi
 fi
 echo -e "Done.\n";
