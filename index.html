@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-dark.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Log2iptables by theMiddleBlue</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Log2iptables</h1>
+          <h2>automatically creates iptables rules from logfile</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/theMiddleBlue/log2iptables/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/theMiddleBlue/log2iptables/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/theMiddleBlue/log2iptables" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>
+<a id="log2iptables-16" class="anchor" href="#log2iptables-16" aria-hidden="true"><span class="octicon octicon-link"></span></a>log2iptables 1.6</h1>
+
+<p>log2iptables is a Bash script that parse a log file and execute iptables command. Useful for automatically block an IP address against bruteforce or port scan activities.</p>
+
+<p>By a simple regular expression match, you can parse any logfile type and take an action on iptables. For example, with log2iptables you can: Search for all logs in /var/log/myssh.log that match "Failed password.* ([0-9]+.[0-9]+.[0-9]+.[0-9]+)" more that 5 times, and then block the ipaddress with iptables with action DROP.</p>
+
+<p>Why a Bash script?</p>
+
+<blockquote>
+<p>simple is better. no deps, no installation, no fucking boring things. just run it in crontab :)</p>
+</blockquote>
+
+<h2>
+<a id="index" class="anchor" href="#index" aria-hidden="true"><span class="octicon octicon-link"></span></a>Index</h2>
+
+<ul>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#examples">Examples</a></li>
+<li><a href="#automaitc-drop-ssh-bruteforce">Drop SSH Bruteforce</a></li>
+<li><a href="#automatic-drop-nmap-scan">Drop Nmap Port Scan</a></li>
+<li><a href="#nginx-drop-scan--bot">Drop Bot/Scan reading Nginx logs</a></li>
+<li><a href="#crontab">Crontab</a></li>
+<li><a href="#execute-command-after-iptables-run">Execute command</a></li>
+<li><a href="#send-notification-via-http-post">Notify via HTTP</a></li>
+<li><a href="#use-telegram-bot">Use Telegram</a></li>
+<li><a href="#todo">TODO</a></li>
+<li><a href="#contact">Contact</a></li>
+</ul>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<pre><code>./log2iptables -h
+</code></pre>
+
+<ul>
+<li>
+<code>-f</code>  Log file to read (default: <code>/var/log/auth.log</code>)</li>
+<li>
+<code>-r</code>  Regular Expression (ex: <code>"(F|f)ail.*([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)"</code>)</li>
+<li>
+<code>-p</code>  IP Address group number (on example regex before: 2)</li>
+<li>
+<code>-l</code>  How many times the regex must match (default: 5)</li>
+<li>
+<code>-x</code>  Execute IPTables command 1=enable 0=disable (default: 1)</li>
+<li>
+<code>-a</code>  IPTables Action (<code>the iptables -j argument, default: DROP</code>)</li>
+<li>
+<code>-i</code>  IPTables insert (I) or append (A) mode (default: I)</li>
+<li>
+<code>-c</code>  IPTables chain like INPUT, OUTPUT, etc... (default: INPUT)</li>
+<li><strong>System Functions:</strong></li>
+<li>
+<code>-X</code>  Execute command after add new iptables rules (default: 0)</li>
+<li><strong>HTTP Functions:</strong></li>
+<li>
+<code>-u</code>  Enable send HTTP POST request with all ip found 1=on 0=off (default: 0)</li>
+<li>
+<code>-U</code>  Destination URL (example: <code>http://myserver/myscript.php</code>)</li>
+<li>
+<code>-H</code>  Header parameters to send with curl (optional)</li>
+<li><strong>Telegram Functions:</strong></li>
+<li>
+<code>-t</code>  Send Telegram msg on iptables command 0=off, 1=on (default: 0)</li>
+<li>
+<code>-T</code>  Set Telegram bot Token</li>
+<li>
+<code>-C</code>  Set Telegram Chat ID</li>
+</ul>
+
+<h2>
+<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Examples</h2>
+
+<h3>
+<a id="automaitc-drop-ssh-bruteforce" class="anchor" href="#automaitc-drop-ssh-bruteforce" aria-hidden="true"><span class="octicon octicon-link"></span></a>Automaitc drop SSH Bruteforce</h3>
+
+<p>i use this script for automatic response against SSH bruteforce, and for block Nmap SYN/TCP scan. The first example relates SSH logs, with a regular expression that search for failed login:</p>
+
+<pre><code>./log2iptables.sh -x 1 -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5
+
+Reading log file: /var/log/auth.log
+Using regex: sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})
+IP Address group position: 3
+Set limit match to: 5
+
+[Found] 59.188.247.119 more then 5 times (4393 match)
+`-- [Check] if 59.188.247.119 already exists in iptables...
+   `-- [Add ] Add IP 59.188.247.119 to iptables (-j DROP)
+
+1 New IP Address(es) added to iptables:
++
+| 59.188.247.119    
++
+Done.
+</code></pre>
+
+<p>If you neet to test the script, or the regular expression, without add any rules to iptables, you can run log2iptables with the <code>-x 0</code> argument:</p>
+
+<pre><code>./log2iptables.sh -x 0 -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5
+</code></pre>
+
+<p>with <code>-x 0</code> argument, log2iptables will <strong>not</strong> run the iptables command.</p>
+
+<h3>
+<a id="automatic-drop-nmap-scan" class="anchor" href="#automatic-drop-nmap-scan" aria-hidden="true"><span class="octicon octicon-link"></span></a>Automatic drop Nmap Scan</h3>
+
+<p>For automatic drop Nmap SYN scan, i've configured my iptables with the following rule:</p>
+
+<pre><code>iptables -I INPUT -p tcp -m multiport --dports 23,79 -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG SYN -m limit --limit 3/min -j LOG --log-prefix "PortScan SYN&gt;"
+</code></pre>
+
+<p>in my environment, this rule write a log in /var/log/syslog every time someone scan my server (something like: nmap -sS myserver). I've put in crontab log2iptables with the following arguments:</p>
+
+<pre><code>./log2iptables.sh -x 1 -f /var/log/syslog -r "PortScan.*SRC\=([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)" -p 1 -l 1
+
+Reading log file: /var/log/syslog
+Using regex: PortScan.*SRC\=([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)
+IP Address group position: 1
+Set limit match to: 1
+
+[Found] 61.239.124.78 more then 1 times (1 match)
+`-- [Check] if 61.239.124.78 already exists in iptables...
+   `-- [Add ] Add IP 61.239.124.78 to iptables (-j DROP)
+[Found] 112.233.174.61 more then 1 times (1 match)
+`-- [Check] if 112.233.174.61 already exists in iptables...
+   `-- [Add ] Add IP 112.233.174.61 to iptables (-j DROP)
+[Found] 112.134.246.185 more then 1 times (1 match)
+`-- [Check] if 112.134.246.185 already exists in iptables...
+   `-- [Add ] Add IP 112.134.246.185 to iptables (-j DROP)
+[Found] 220.75.203.9 more then 1 times (1 match)
+`-- [Check] if 220.75.203.9 already exists in iptables...
+   `-- [Add ] Add IP 220.75.203.9 to iptables (-j DROP)
+[Found] 101.30.131.78 more then 1 times (1 match)
+`-- [Check] if 101.30.131.78 already exists in iptables...
+   `-- [Add ] Add IP 101.30.131.78 to iptables (-j DROP)
+[Found] 121.189.181.61 more then 1 times (1 match)
+`-- [Check] if 121.189.181.61 already exists in iptables...
+   `-- [Add ] Add IP 121.189.181.61 to iptables (-j DROP)
+[Found] 110.248.230.43 more then 1 times (1 match)
+`-- [Check] if 110.248.230.43 already exists in iptables...
+   `-- [Add ] Add IP 110.248.230.43 to iptables (-j DROP)
+[Found] 46.161.40.37 more then 1 times (3 match)
+`-- [Check] if 46.161.40.37 already exists in iptables...
+   `-- [Add ] Add IP 46.161.40.37 to iptables (-j DROP)
+[Found] 182.70.50.47 more then 1 times (2 match)
+`-- [Check] if 182.70.50.47 already exists in iptables...
+   `-- [Add ] Add IP 182.70.50.47 to iptables (-j DROP)
+[Found] 186.153.198.202 more then 1 times (1 match)
+`-- [Check] if 186.153.198.202 already exists in iptables...
+   `-- [Add ] Add IP 186.153.198.202 to iptables (-j DROP)
+[Found] 113.124.167.80 more then 1 times (1 match)
+`-- [Check] if 113.124.167.80 already exists in iptables...
+   `-- [Add ] Add IP 113.124.167.80 to iptables (-j DROP)
+...omitted for more clarity...
+
+
+73 New IP Address(es) added to iptables:
++
+| 112.233.174.61     | 61.239.124.78      | 220.75.203.9
+| 112.134.246.185    | 121.189.181.61     | 101.30.131.78
+| 182.70.50.47       | 46.161.40.37       | 110.248.230.43
+| 186.153.198.202    | 72.188.204.15      | 113.124.167.80
+| 87.255.94.110      | 188.95.110.120     | 80.82.64.127
+| 119.246.121.168    | 171.91.240.152     | 119.204.220.229
+| 106.35.64.185      | 39.79.196.94       | 189.102.68.52
+| 220.123.188.21     | 110.243.213.174    | 80.85.120.83
+| 41.203.234.100     | 115.45.184.50      | 220.174.115.92
+| 113.174.105.113    | 124.106.19.90      | 101.72.27.166
+| 121.27.163.6       | 121.236.182.73     | 101.160.155.95
+| 112.101.149.40     | 222.132.23.141     | 81.225.106.161
+| 119.141.235.202    | 210.50.232.120     | 87.223.108.183
+| 120.8.171.42       | 202.44.234.114     | 110.240.228.180
+| 85.100.6.242       | 116.10.8.50        | 117.56.165.83
+| 218.214.55.126     | 113.79.70.230      | 114.44.228.122
+| 124.244.79.230     | 39.69.24.96        | 110.172.27.188
+| 169.45.161.177     | 218.159.0.38       | 180.177.169.116
+| 59.16.116.92       | 95.235.73.99       | 110.247.216.169
+| 219.74.183.157     | 222.218.95.151     | 177.75.44.241
+| 178.153.52.213     | 112.234.194.243    | 93.92.199.103
+| 108.223.43.250     | 59.127.52.197      | 101.72.37.178
+| 115.54.145.2       | 5.149.203.81       | 41.41.245.224
+| 27.203.109.249     | 78.187.121.165     | 220.170.221.50
+| 178.130.35.92      
++
+Done.
+</code></pre>
+
+<p>Obviously, here the output is more verbose.</p>
+
+<h3>
+<a id="nginx-drop-scan--bot" class="anchor" href="#nginx-drop-scan--bot" aria-hidden="true"><span class="octicon octicon-link"></span></a>Nginx drop scan / bot</h3>
+
+<p>Easy way to automatic drop bot or web scan, reading http access log.
+I've a nginx server that store all logs in <code>/usr/local/nginx/logs/example.com.access</code>.
+My website is not a Drupal or Wordpress installation, but i receive daily requests for
+pages like: wp-login, wp-admin, install.php, xmlrpc.php, etc... that does not exists (404).
+With log2iptables i can drop it by runing:</p>
+
+<pre><code>./log2iptables.sh -x 1 -f /usr/local/nginx/logs/example.com.access -r "([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+) .*GET \/(wp\-|admin|install|setup|xmlrpc).* 404 " -p 1 -l 1
+</code></pre>
+
+<h2>
+<a id="crontab" class="anchor" href="#crontab" aria-hidden="true"><span class="octicon octicon-link"></span></a>Crontab</h2>
+
+<p>I don't know which is the better way to run this script in crontab.
+Anyway, I've the following configuration:</p>
+
+<pre><code>*/5 * * * * /usr/local/bin/log2iptables.sh -x 1 -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5 &gt; /dev/null 2&gt;&amp;1
+*/1 * * * * /usr/local/bin/log2iptables.sh -x 1 -f /var/log/syslog -r "PortScan.*SRC\=([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)" -p 1 -l 1 &gt; /dev/null 2&gt;&amp;1
+</code></pre>
+
+<h2>
+<a id="execute-command-after-iptables-run" class="anchor" href="#execute-command-after-iptables-run" aria-hidden="true"><span class="octicon octicon-link"></span></a>Execute command after iptables run</h2>
+
+<p>When log2iptables add new iptables rules, can execute a command.
+You can specify the command with argument -X and you can choose
+how to format the ip address list using IPLISTCSV or IPLIST PIPE.
+For example:</p>
+
+<pre><code>./log2iptables.sh -f /var/log/messages -r "PortScan.*SRC\=([0-9\.]+)" -p 1 -X "echo IPLISTCSV"
+</code></pre>
+
+<p>execute the command "echo" and the string IPLISTCSV will be replaced
+with all ip addresses added on iptables. the output is:</p>
+
+<pre><code>...
+
+3 New IP Address(es) added to iptables:
++
+| 83.103.171.94    | 46.161.40.37    | 95.213.143.180
++
+
+Executing Command: echo IPLISTCSV
++
+83.103.171.94,46.161.40.37,95.213.143.180
++
+
+Done.
+</code></pre>
+
+<p>This is useful if you have to send this information to others applications
+like IPS or Firewall API, WAF API, etc...</p>
+
+<h2>
+<a id="send-notification-via-http-post" class="anchor" href="#send-notification-via-http-post" aria-hidden="true"><span class="octicon octicon-link"></span></a>Send notification via HTTP POST</h2>
+
+<p>You can enable the HTTP POST function that send all ip addresses found to a specific URL with a POST request using curl. For example:</p>
+
+<pre><code>./log2iptables.sh -f /var/log/auth.log.2 -u 1 -U "http://www.mywebsite.com/log2ip.php"
+</code></pre>
+
+<p>this PHP script will receive a POST request with the following parameters:</p>
+
+<div class="highlight highlight-text-html-php"><pre><span class="pl-s1"><span class="pl-c1">print_r</span>(<span class="pl-smi">$_POST</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">Array</span> (</span>
+<span class="pl-s1">    [<span class="pl-c1">ipaddresses</span>] <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>10.2.3.4, 10.5.6.7, 10.8.9.10<span class="pl-pds">'</span></span>,</span>
+<span class="pl-s1">    [<span class="pl-c1">logfile</span>] <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>/var/log/auth.log<span class="pl-pds">'</span></span>,</span>
+<span class="pl-s1">    [<span class="pl-c1">system</span>] <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>mylocalhost.domain<span class="pl-pds">'</span></span></span>
+<span class="pl-s1">)</span></pre></div>
+
+<h2>
+<a id="use-telegram-bot" class="anchor" href="#use-telegram-bot" aria-hidden="true"><span class="octicon octicon-link"></span></a>Use Telegram Bot</h2>
+
+<p>Now you can send a text message to your phone, using Telegram, when log2iptables execute the iptables command. This is possible by using the Telegram Bot API. For more information see <a href="https://core.telegram.org/bots/api">https://core.telegram.org/bots/api</a> or this useful tutorial <a href="http://unnikked.ga/getting-started-with-telegram-bots/">http://unnikked.ga/getting-started-with-telegram-bots/</a> on how to get a bot Token.</p>
+
+<p>Anyway, i've created a new Telegram Bot just visiting <a href="https://telegram.me/botfather">https://telegram.me/botfather</a> and then i've open a chat with my bot. Then i've get the Chat ID with curl, like this:</p>
+
+<pre><code>curl "https://api.telegram.org/bot&lt;token&gt;/getUpdates"
+
+{"ok":true,"result":[{"update_id":xxxxx,
+"message":{"message_id":1,"from":{"id":xxxxx,"first_name":"Andrea","last_name":"Menin","username":"theMiddle"},"chat":{"id":123456,"first_name":"Andrea","last_name":"Menin","username":"theMiddle","type":"private"},"date":xxxxxxx,"text":"\/start"}}]}
+</code></pre>
+
+<p>The JSON output include my Chat ID: 123456 (fake) and i can use it for send text message from my bot, with something like this:</p>
+
+<pre><code>curl -d "text=hey Andrea... i am your father&amp;chat_id=123456" "https://api.telegram.org/bot&lt;token&gt;/sendMessage"
+</code></pre>
+
+<h3>
+<a id="notify-on-iptables-command-execution-using-telegram" class="anchor" href="#notify-on-iptables-command-execution-using-telegram" aria-hidden="true"><span class="octicon octicon-link"></span></a>Notify on iptables command execution using Telegram</h3>
+
+<p>When log2iptables adds a rule on iptables, it can notify the event to your phone via Telegram.
+For doing that, you need the -t 1, -T and -C arguments that means:</p>
+
+<ul>
+<li>
+<code>-t 1</code> Active notification using Telegram</li>
+<li>
+<code>-T &lt;token&gt;</code> Set the Telegram Bot Token</li>
+<li>
+<code>-C &lt;chatid&gt;</code> Set the Telegram Chat ID</li>
+</ul>
+
+<p>The command will be something like the following:</p>
+
+<pre><code>./log2iptables.sh -x 1 -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5 -t 1 -T "myTokenBlablabla" -C "123456"
+</code></pre>
+
+<p>the result is:
+<img src="https://waf.blue/img/TelegramScreenshot.jpg" alt="screenshot"></p>
+
+<h2>
+<a id="todo" class="anchor" href="#todo" aria-hidden="true"><span class="octicon octicon-link"></span></a>TODO</h2>
+
+<ul>
+<li>2015-11-15 <code>[high  ]</code> <del>Execute command on iptables rule add</del> done v1.6</li>
+<li>2015-11-11 <code>[high  ]</code> <del>Send Telegram notification (using telegram bot)</del> done v1.4</li>
+<li>2015-11-11 <code>[high  ]</code> <del>Set -x 0 as default</del> (tnx yuredd) done v1.5</li>
+<li>2015-11-11 <code>[medium]</code> Save iptables configuration and restore at boot (tnx yuredd)</li>
+<li>2015-11-10 <code>[medium]</code> <del>HTTP POST ip list to URL</del> done v1.5</li>
+<li>2015-11-09 <code>[high  ]</code> Send mail with log2iptables output</li>
+<li>2015-11-09 <code>[high  ]</code> Optional port and protocol on iptables command</li>
+<li>2015-11-09 <code>[low   ]</code> HTML Output</li>
+</ul>
+
+<p>all contribution are welcome :)</p>
+
+<h2>
+<a id="contact" class="anchor" href="#contact" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contact</h2>
+
+<pre><code>Andrea (aka theMiddle) Menin
+https://waf.blue
+theMiddle@waf.blue
+</code></pre>
+        </section>
+
+        <footer>
+          Log2iptables is maintained by <a href="https://github.com/theMiddleBlue">theMiddleBlue</a><br>
+          This page was generated by <a href="https://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
