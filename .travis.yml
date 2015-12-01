@@ -1,7 +1,7 @@
 language: bash
 
 before_script:
-  - echo "Oct 27 06:42:03 localhost sshd[12345]: Failed password for root from 1.1.1.1 port 1111 ssh2" > test.log
+  - echo "T2N0IDI3IDA2OjQyOjAzIGxvY2FsaG9zdCBzc2hkWzEyMzQ1XTogRmFpbGVkIHBhc3N3b3JkIGZvciByb290IGZyb20gMS4xLjEuMSBwb3J0IDExMTEgc3NoMgo=" | base64 -d > test.log
 
 script:
   - bash log2iptables.sh -f test.log -r "sshd.*Failed.*([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 1 -l 1
