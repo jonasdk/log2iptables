@@ -1,6 +1,6 @@
 language: bash
 
-before_script
+before_script:
   - echo "Oct 27 06:42:03 localhost sshd[12345]: Failed password for root from 1.1.1.1 port 1111 ssh2" > test.log
 
 script:
