@@ -1,0 +1,4 @@
+language: bash
+
+script:
+  - bash log2iptables.sh -h

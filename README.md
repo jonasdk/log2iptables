@@ -23,7 +23,7 @@ Why a Bash script?
 
 ## Usage
 ```
-./log2iptables -h
+./log2iptables.sh -h
 ```
 - `-f `  Log file to read (default: `/var/log/auth.log`)
 - `-r `  Regular Expression (ex: `"(F|f)ail.*([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)"`)
