@@ -6,6 +6,7 @@ By a simple regular expression match, you can parse any logfile type and take an
 Why a Bash script?
 > simple is better. no deps, no installation, no fucking boring things. just run it in crontab :)
 
+[![Build Status](https://travis-ci.org/theMiddleBlue/log2iptables.svg?branch=master)](https://travis-ci.org/theMiddleBlue/log2iptables)
 
 ## Index
 - [Usage](#usage)
