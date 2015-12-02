@@ -286,8 +286,8 @@ if [ $somethinghappens -eq 1 ]; then
 	fi
 
 	if [ $SENDMAIL -eq 1 ]; then
-		MAILBODY="Hi,\\r\\n\\r\\n Following IPs were Updated/Deleted/Added to iptables:\\r\\n ${mailout}\\r\\n\\r\\nOn system: ${shostname} (${sallipadd})\\r\\nFound in log: ${LOGFILE}\\r\\n\\r\\n--\\r\\nlog2iptables\\r\\nhttps://github.com/theMiddleBlue/log2iptables";
-		echo -e "Subject: [log2iptables] new rules added\r\n\r\n${MAILBODY}" | ${binsendmail} -f "${SENDMAILFROM}" "${SENDMAILTO}"
+		MAILBODY="Hi,\\r\\n\\r\\n Following IPs were Updated/Added to iptables:\\r\\n ${mailout}\\r\\n\\r\\nOn system: ${shostname} (${sallipadd})\\r\\nFound in log: ${LOGFILE}\\r\\n\\r\\n--\\r\\nlog2iptables\\r\\nhttps://github.com/theMiddleBlue/log2iptables";
+		echo -e "Subject: [log2iptables] New iptables rules added\r\n\r\n${MAILBODY}" | ${binsendmail} -f "${SENDMAILFROM}" "${SENDMAILTO}"
 	fi
 
 	if [ "$EXECCMD" != 0 ]; then
