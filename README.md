@@ -15,7 +15,7 @@ Why a Bash script?
 - [Drop Nmap Port Scan](#automatic-drop-nmap-scan)
 - [Drop Bot/Scan reading Nginx logs](#nginx-drop-scan--bot)
 - [Crontab](#crontab)
-- [Notify via Mail](#)
+- [Notify via Mail](#notify-via-mail)
 - [Execute command](#execute-command-after-iptables-run)
 - [Notify via HTTP](#send-notification-via-http-post)
 - [Use Telegram](#use-telegram-bot)
