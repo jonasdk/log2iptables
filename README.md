@@ -1,4 +1,4 @@
-# log2iptables 1.6
+# log2iptables 1.7
 log2iptables is a Bash script that parse a log file and execute iptables command. Useful for automatically block an IP address against bruteforce or port scan activities.
 
 By a simple regular expression match, you can parse any logfile type and take an action on iptables. For example, with log2iptables you can: Search for all logs in /var/log/myssh.log that match "Failed password.* ([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)" more that 5 times, and then block the ipaddress with iptables with action DROP.
@@ -15,6 +15,7 @@ Why a Bash script?
 - [Drop Nmap Port Scan](#automatic-drop-nmap-scan)
 - [Drop Bot/Scan reading Nginx logs](#nginx-drop-scan--bot)
 - [Crontab](#crontab)
+- [Notify via Mail](#)
 - [Execute command](#execute-command-after-iptables-run)
 - [Notify via HTTP](#send-notification-via-http-post)
 - [Use Telegram](#use-telegram-bot)
@@ -34,6 +35,8 @@ Why a Bash script?
 - `-a `  IPTables Action (`the iptables -j argument, default: DROP`)
 - `-i `  IPTables insert (I) or append (A) mode (default: I)
 - `-c `  IPTables chain like INPUT, OUTPUT, etc... (default: INPUT)
+- `-m `  Send mail on each new iptables rule to <address>
+- `-M `  Send mail on each new iptables rule from <address>
 - **System Functions:**
 - `-X `  Execute command after add new iptables rules (default: 0)
 - **HTTP Functions:**
@@ -183,6 +186,13 @@ Anyway, I've the following configuration:
 */1 * * * * /usr/local/bin/log2iptables.sh -x 1 -f /var/log/syslog -r "PortScan.*SRC\=([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)" -p 1 -l 1 > /dev/null 2>&1
 ```
 
+## Notify via Mail
+log2iptables can send a mail each time it add a new iptables rule. For doing that,
+run log2iptables with the `-m <mail to>` and `-M <mail from>` parameters. For example:
+```
+./log2iptables.sh -f /var/log/auth.log -x 1 -r 'sshd.*Failed.password.*from.([0-9\.]+)' -p 1 -l 5 -m "themiddle@mycompany.com" -M "noreply@localhost.local"
+```
+
 ## Execute command after iptables run
 When log2iptables add new iptables rules, can execute a command.
 You can specify the command with argument -X and you can choose
@@ -263,7 +273,7 @@ the result is:
 - 2015-11-11 `[high  ]` ~~Set -x 0 as default~~ (tnx yuredd) done v1.5
 - 2015-11-11 `[medium]` Save iptables configuration and restore at boot (tnx yuredd)
 - 2015-11-10 `[medium]` ~~HTTP POST ip list to URL~~ done v1.5
-- 2015-11-09 `[high  ]` Send mail with log2iptables output
+- 2015-11-09 `[high  ]` ~~Send mail with log2iptables output~~ done v1.7
 - 2015-11-09 `[high  ]` Optional port and protocol on iptables command
 - 2015-11-09 `[low   ]` HTML Output
 

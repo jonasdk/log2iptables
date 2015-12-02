@@ -10,7 +10,7 @@
 # https://github.com/theMiddleBlue/log2iptables
 # Author: Andrea (aka theMiddle) Menin
 #
-VERSION="1.6";
+VERSION="1.7";
 
 # -- CONFIG default value --
 #
@@ -72,7 +72,7 @@ EXECCMD="0";
 #
 # -- END CONFIG --
 
-
+SENDMAIL=0;
 
 echo ""
 biniptables=$(which iptables);
@@ -80,10 +80,11 @@ bingrep=$(which grep);
 binwc=$(which wc);
 bincurl=$(which curl);
 bincolumn=$(which column);
+binsendmail=$(which sendmail);
 shostname=$(hostname);
 sallipadd=$(hostname --all-ip-addresses);
 
-while getopts :hf:r:p:l:a:i:c:t:T:C:x:u:U:H:X: OPTION; do
+while getopts :hf:r:p:l:a:i:c:t:T:C:x:u:U:H:X:m:M: OPTION; do
 	case $OPTION in
 		f)
 			echo "Reading log file: ${OPTARG}";
@@ -145,31 +146,42 @@ while getopts :hf:r:p:l:a:i:c:t:T:C:x:u:U:H:X: OPTION; do
 			echo "Execute command when iptables run: ${OPTARG}"
 			EXECCMD="${OPTARG}";
 		;;
+		m)
+			echo "On new iptables rules, send mail to: ${OPTARG}"
+			SENDMAILTO="${OPTARG}";
+			SENDMAIL=1;
+		;;
+		M)
+			echo "Mail from: ${OPTARG}"
+			SENDMAILFROM="${OPTARG}";
+		;;
 		h)
 			echo "Usage: ${0} -x [0|1] -f <logfile> [rplaic]"
 			echo ""
-			echo "-h   This help"
-			echo "-f   Log file to read (default: /var/log/auth.log)"
-			echo "-r   Regular Expression (ex: \"(F|f)ail.*([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\")"
-			echo "-p   IP Address group number (on example regex before: 2)"
-			echo "-l   How many times the regex must match (default: 5)"
-			echo "-x   Execute IPTables command 1=enable 0=disable (default: 0)"
-			echo "-a   IPTables Action (the iptables -j argument, default: DROP)"
-			echo "-i   IPTables insert (I) or append (A) mode (default: I)"
-			echo "-c   IPTables chain like INPUT, OUTPUT, etc... (default: INPUT)"
+			echo "-h            This help"
+			echo "-f <file>     Log file to read (default: /var/log/auth.log)"
+			echo "-r <regex>    Regular Expression (ex: \"(F|f)ail.*([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\")"
+			echo "-p <number>   IP Address group number (on example regex before: 2)"
+			echo "-l <number>   How many times the regex must match (default: 5)"
+			echo "-x <1 or 0>   Execute IPTables command 1=enable 0=disable (default: 0)"
+			echo "-a <action>   IPTables Action (the iptables -j argument, default: DROP)"
+			echo "-i <I or A>   IPTables insert (I) or append (A) mode (default: I)"
+			echo "-c <chain>    IPTables chain like INPUT, OUTPUT, etc... (default: INPUT)"
+			echo "-m <address>  When log2iptables adds new rules, send mail to <address>"
+			echo "-M <address>  Send mail from <address>"
 			echo ""
 			echo "System Functions:"
-			echo "-X   Execute command after new iptables rules added (default: 0)"
+			echo "-X <cmd>      Execute command <cmd> after new iptables rules added (default: 0)"
 			echo ""
 			echo "HTTP Functions:"
-			echo "-u   Enable send HTTP POST request with all ip found 1=on 0=off (default: 0)"
-			echo "-U   Destination URL (example: http://myserver/myscript.php)"
-			echo "-H   Header parameters to send with curl (optional)"
+			echo "-u <1 or 0>   Enable send HTTP POST request with all ip found 1=on 0=off (default: 0)"
+			echo "-U <url>      Destination URL (example: http://myserver/myscript.php)"
+			echo "-H <param>    Header parameters to send with curl (optional)"
 			echo ""
 			echo "Telegram Functions:"
-			echo "-t   Send Telegram msg on iptables command 0=off, 1=on (default: 0)"
-			echo "-T   Set Telegram bot Token"
-			echo "-C   Set Telegram Chat ID"
+			echo "-t <1 or 0>   Send Telegram msg on iptables command 0=off, 1=on (default: 0)"
+			echo "-T <token>    Set Telegram bot Token"
+			echo "-C <chat id>  Set Telegram Chat ID"
 			echo ""
 			echo "examples usage at https://github.com/theMiddleBlue/log2iptables#examples"
 			echo ""
@@ -243,10 +255,12 @@ if [ $somethinghappens -eq 1 ]; then
 	telegramout="";
 	csvout="";
 	pipeout="";
+	mailout="";
 	echo -e "\n${#addedip[@]} New IP Address(es) added to iptables:";
 	echo "+";
 	i=1;
 	for s in "${!addedip[@]}"; do
+		mailout="${mailout}- ${s}\\n";
 		telegramout="${telegramout}${s}%2C ";
 		csvout="${csvout}${s},";
 		pipeout="${pipeout}${s}|";
@@ -269,6 +283,11 @@ if [ $somethinghappens -eq 1 ]; then
 	if [ $SENDHTTP -eq 1 ]; then
 		echo -e "[${COL1}Send ${COL0}] http post request with curl."
 		${bincurl} -s -d "ipaddresses=${telegramout}&logfile=${LOGFILE}&system=${shostname}" -A "log2iptables ${VERSION} (https://github.com/theMiddleBlue/log2iptables)" -H "${HTTPHEADERS}" "${HTTPURL}" > /dev/null
+	fi
+
+	if [ $SENDMAIL -eq 1 ]; then
+		MAILBODY="Hi,\\r\\n\\r\\n Following IPs were Updated/Deleted/Added to iptables:\\r\\n ${mailout}\\r\\n\\r\\nOn system: ${shostname} (${sallipadd})\\r\\nFound in log: ${LOGFILE}\\r\\n\\r\\n--\\r\\nlog2iptables\\r\\nhttps://github.com/theMiddleBlue/log2iptables";
+		echo -e "Subject: [log2iptables] new rules added\r\n\r\n${MAILBODY}" | ${binsendmail} -f "${SENDMAILFROM}" "${SENDMAILTO}"
 	fi
 
 	if [ "$EXECCMD" != 0 ]; then
