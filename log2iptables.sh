@@ -160,9 +160,7 @@ while getopts :hf:r:p:l:a:i:c:t:T:C:x:u:U:H:X:m:M:e: OPTION; do
 				echo "Predefined template: ${OPTARG}"
 				REGEXP="sshd.*Failed.password.*from.([0-9\\.]+)";
 				REGEXPIPPOS=1;
-			fi
-
-			if [[ "$OPTARG" -eq "nginx-scan-nikto" ]]; then
+			elif [[ "$OPTARG" -eq "nginx-scan-nikto" ]]; then
 				echo "Predefined template: ${OPTARG}"
 				REGEXP="([0-9\.]+).*Nikto";
 				REGEXPIPPOS=1;
@@ -302,8 +300,8 @@ if [ $somethinghappens -eq 1 ]; then
 	fi
 
 	if [ $SENDMAIL -eq 1 ]; then
-		MAILBODY="Hi,\\r\\n\\r\\n Following IPs were Updated/Added to iptables:\\r\\n ${mailout}\\r\\n\\r\\nOn system: ${shostname} (${sallipadd})\\r\\nFound in log: ${LOGFILE}\\r\\n\\r\\n--\\r\\nlog2iptables\\r\\nhttps://github.com/theMiddleBlue/log2iptables";
-		echo -e "Subject: [log2iptables] New iptables rules added\r\n\r\n${MAILBODY}" | ${binsendmail} -f "${SENDMAILFROM}" "${SENDMAILTO}"
+		MAILBODY="Hi,\\r\\n\\r\\n Following IPs were Updated/Added to iptables:\\r\\n ${mailout}\\r\\n\\r\\nOn system: ${shostname}\\r\\nIP Addresses: ${sallipadd}\\r\\nFound in log: ${LOGFILE}\\r\\n\\r\\n--\\r\\nlog2iptables\\r\\nhttps://github.com/theMiddleBlue/log2iptables";
+		echo -e "Subject: [log2iptables] New iptables rules added\r\n\r\n${MAILBODY}" | ${binsendmail} -F "log2iptables" -f "${SENDMAILFROM}" "${SENDMAILTO}"
 	fi
 
 	if [ "$EXECCMD" != 0 ]; then
