@@ -330,7 +330,7 @@ the result is:
 - 2015-11-09 `[high  ]` Optional port and protocol on iptables command
 - 2015-11-09 `[low   ]` HTML Output
 
-all contribution are welcome :)
+all contributions are welcome :)
 
 ## Contact
 ```
