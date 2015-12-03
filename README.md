@@ -32,7 +32,7 @@ Why a Bash script?
 - `-r `  Regular Expression (ex: `"(F|f)ail.*([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)"`)
 - `-p `  IP Address group number (on example regex before: 2)
 - `-l `  How many times the regex must match (default: 5)
-- `-x `  Execute IPTables command 1=enable 0=disable (default: 1)
+- `-x `  Execute IPTables command 1=enable 0=disable (default: 0)
 - `-a `  IPTables Action (`the iptables -j argument, default: DROP`)
 - `-i `  IPTables insert (I) or append (A) mode (default: I)
 - `-c `  IPTables chain like INPUT, OUTPUT, etc... (default: INPUT)
