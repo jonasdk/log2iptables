@@ -5,4 +5,4 @@ before_script:
 
 script:
   - bash log2iptables.sh -f test.log -r "sshd.*Failed.*([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 1 -l 1
-  - bash log2iptables.sh -f test.log -e ssh-bruteforce
+  - bash log2iptables.sh -f test.log -e ssh-bruteforce -l 1
