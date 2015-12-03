@@ -84,7 +84,7 @@ binsendmail=$(which sendmail);
 shostname=$(hostname);
 sallipadd=$(hostname --all-ip-addresses);
 
-while getopts :hf:r:p:l:a:i:c:t:T:C:x:u:U:H:X:m:M: OPTION; do
+while getopts :hf:r:p:l:a:i:c:t:T:C:x:u:U:H:X:m:M:e: OPTION; do
 	case $OPTION in
 		f)
 			echo "Reading log file: ${OPTARG}";
@@ -155,6 +155,19 @@ while getopts :hf:r:p:l:a:i:c:t:T:C:x:u:U:H:X:m:M: OPTION; do
 			echo "Mail from: ${OPTARG}"
 			SENDMAILFROM="${OPTARG}";
 		;;
+		e)
+			if [[ "$OPTARG" -eq "ssh-bruteforce" ]]; then
+				echo "Predefined template: ${OPTARG}"
+				REGEXP="sshd.*Failed.password.*from.([0-9\\.]+)";
+				REGEXPIPPOS=1;
+			fi
+
+			if [[ "$OPTARG" -eq "nginx-scan-nikto" ]]; then
+				echo "Predefined template: ${OPTARG}"
+				REGEXP="([0-9\.]+).*Nikto";
+				REGEXPIPPOS=1;
+			fi
+		;;
 		h)
 			echo "Usage: ${0} -x [0|1] -f <logfile> [rplaic]"
 			echo ""
@@ -169,6 +182,9 @@ while getopts :hf:r:p:l:a:i:c:t:T:C:x:u:U:H:X:m:M: OPTION; do
 			echo "-c <chain>    IPTables chain like INPUT, OUTPUT, etc... (default: INPUT)"
 			echo "-m <address>  When log2iptables adds new rules, send mail to <address>"
 			echo "-M <address>  Send mail from <address>"
+			echo ""
+			echo "Predefined Templates:"
+			echo "-e <template> Active template: ssh-bruteforce, nginx-scan-nikto"
 			echo ""
 			echo "System Functions:"
 			echo "-X <cmd>      Execute command <cmd> after new iptables rules added (default: 0)"

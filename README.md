@@ -37,6 +37,8 @@ Why a Bash script?
 - `-c `  IPTables chain like INPUT, OUTPUT, etc... (default: INPUT)
 - `-m `  Send mail on each new iptables rule to <address>
 - `-M `  Send mail on each new iptables rule from <address>
+- **Predefined Templates**
+- `-e`   Active template: ssh-bruteforce, nginx-scan-nikto
 - **System Functions:**
 - `-X `  Execute command after add new iptables rules (default: 0)
 - **HTTP Functions:**
@@ -48,9 +50,59 @@ Why a Bash script?
 - `-T `  Set Telegram bot Token
 - `-C `  Set Telegram Chat ID
 
+## Predefined Templates (-e)
+Using one of the following template, you can run log2iptables without `-r` and `-p` arguments.
+Useful for that users that don't want to write a regular expression for parsing log.
+
+Template | Description
+-------- | ------------
+ssh-bruteforce | Search for ssh brute force attacks
+nginx-scan-nikto | Search for Nikto Web scan into Nginx access_log
+
+**ssh-bruteforce usage:**
+```sh
+# ./log2iptables.sh -x 1 -f /var/log/auth.log -e ssh-bruteforce
+
+Execute iptables command: 1
+Reading log file: /var/log/auth.log
+Predefined template: ssh-bruteforce
+
+[Found] 59.188.247.119 more then 5 times (3133 match)
+`-- [Check] if 59.188.247.119 already exists in iptables...
+   `-- [Add ] Add IP 59.188.247.119 to iptables (-j DROP)
+
+1 New IP Address(es) added to iptables:
++
+| 59.188.247.119    
++
+Done.
+```
+
+**nginx-scan-nikto usage:**
+```sh
+# ./log2iptables.sh -x 1 -f /usr/local/nginx/logs/access.log -e nginx-scan-nikto
+
+Execute iptables command: 1
+Reading log file: /usr/local/nginx/logs/access.log
+Predefined template: nginx-scan-nikto
+
+[Found] 66.175.101.218 more then 5 times (609 match)
+`-- [Check] if 66.175.101.218 already exists in iptables...
+   `-- [Add ] Add IP 66.175.101.218 to iptables (-j DROP)
+[Found] 188.166.112.180 more then 5 times (77741 match)
+`-- [Check] if 188.166.112.180 already exists in iptables...
+   `-- [Add ] Add IP 188.166.112.180 to iptables (-j DROP)
+
+2 New IP Address(es) added to iptables:
++
+| 66.175.101.218    | 188.166.112.180    
++
+Done.
+```
+To suggest to add more templates, please contact me at `themiddle@waf.blue`.
 
 ## Examples
-
+Following examples use `-r` (regular expression) and `-p` (regex group number where IP is present)
 
 ### Automaitc drop SSH Brute Force
 i use this script for automatic response against SSH brute force, and for block Nmap SYN/TCP scan. The first example relates SSH logs, with a regular expression that search for failed login:
