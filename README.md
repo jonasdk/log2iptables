@@ -10,10 +10,11 @@ Why a Bash script?
 
 ## Index
 - [Usage](#usage)
+- [Predefined Templates](#predefined-templates--e)
 - [Examples](#examples)
-- [Drop SSH Brute Force](#automaitc-drop-ssh-bruteforce)
-- [Drop Nmap Port Scan](#automatic-drop-nmap-scan)
-- [Drop Bot/Scan reading Nginx logs](#nginx-drop-scan--bot)
+ - [Drop SSH Brute Force](#automaitc-drop-ssh-bruteforce)
+ - [Drop Nmap Port Scan](#automatic-drop-nmap-scan)
+ - [Drop Bot/Scan reading Nginx logs](#nginx-drop-scan--bot)
 - [Crontab](#crontab)
 - [Notify via Mail](#notify-via-mail)
 - [Execute command](#execute-command-after-iptables-run)
@@ -61,7 +62,7 @@ nginx-scan-nikto | Search for Nikto Web scan into Nginx access_log
 
 **ssh-bruteforce usage:**
 ```sh
-# ./log2iptables.sh -x 1 -f /var/log/auth.log -e ssh-bruteforce
+./log2iptables.sh -x 1 -f /var/log/auth.log -e ssh-bruteforce
 
 Execute iptables command: 1
 Reading log file: /var/log/auth.log
@@ -80,7 +81,7 @@ Done.
 
 **nginx-scan-nikto usage:**
 ```sh
-# ./log2iptables.sh -x 1 -f /usr/local/nginx/logs/access.log -e nginx-scan-nikto
+./log2iptables.sh -x 1 -f /usr/local/nginx/logs/access.log -e nginx-scan-nikto
 
 Execute iptables command: 1
 Reading log file: /usr/local/nginx/logs/access.log
