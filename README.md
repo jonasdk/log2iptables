@@ -11,7 +11,7 @@ Why a Bash script?
 ## Index
 - [Usage](#usage)
 - [Examples](#examples)
-- [Drop SSH Bruteforce](#automaitc-drop-ssh-bruteforce)
+- [Drop SSH Brute Force](#automaitc-drop-ssh-bruteforce)
 - [Drop Nmap Port Scan](#automatic-drop-nmap-scan)
 - [Drop Bot/Scan reading Nginx logs](#nginx-drop-scan--bot)
 - [Crontab](#crontab)
@@ -52,8 +52,8 @@ Why a Bash script?
 ## Examples
 
 
-### Automaitc drop SSH Bruteforce
-i use this script for automatic response against SSH bruteforce, and for block Nmap SYN/TCP scan. The first example relates SSH logs, with a regular expression that search for failed login:
+### Automaitc drop SSH Brute Force
+i use this script for automatic response against SSH brute force, and for block Nmap SYN/TCP scan. The first example relates SSH logs, with a regular expression that search for failed login:
 ```
 ./log2iptables.sh -x 1 -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5
 
