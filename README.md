@@ -100,7 +100,7 @@ Predefined template: nginx-scan-nikto
 +
 Done.
 ```
-To suggest to add more templates, please contact me at `themiddle@waf.blue`.
+To suggest or add more templates, please [open a new issue](https://github.com/theMiddleBlue/log2iptables/issues).
 
 ## Examples
 Following examples use `-r` (regular expression) and `-p` (regex group number where IP is present)
