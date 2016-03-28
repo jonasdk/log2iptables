@@ -1,10 +1,10 @@
 # log2iptables 1.7
-log2iptables is a Bash script that parse a log file and execute iptables command. Useful for automatically block an IP address against bruteforce or port scan activities.
+log2iptables is a Bash script that parses a log file and executes iptables command. Useful for automatically block an IP address against brute-force or port scan activities.
 
-By a simple regular expression match, you can parse any logfile type and take an action on iptables. For example, with log2iptables you can: Search for all logs in /var/log/myssh.log that match "Failed password.* ([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)" more that 5 times, and then block the ipaddress with iptables with action DROP.
+By a simple regular expression match, you can parse any logfile type and take an action on iptables. For example, with log2iptables you can: Search for all logs in /var/log/myssh.log that match "Failed password.* ([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)" more that 5 times, and then block the IP address with iptables with action DROP.
 
-Why a Bash script?
-> simple is better. no deps, no installation, no fucking boring things. just run it in crontab :)
+Why use a Bash script?
+> Simple is better. No deps, no installation, no fucking boring things. just run it in crontab :)
 
 [![Build Status](https://travis-ci.org/theMiddleBlue/log2iptables.svg?branch=master)](https://travis-ci.org/theMiddleBlue/log2iptables)
 
@@ -52,8 +52,8 @@ Why a Bash script?
 - `-C `  Set Telegram Chat ID
 
 ## Predefined Templates (-e)
-Using one of the following template, you can run log2iptables without `-r` and `-p` arguments.
-Useful for that users that don't want to write a regular expression for parsing log.
+Using one of the following templates, you can run log2iptables without `-r` and `-p` arguments.
+Useful for users who don't want to write a regular expression for parsing log.
 
 Template | Description
 -------- | ------------
@@ -105,7 +105,7 @@ To suggest or add more templates, please [open a new issue](https://github.com/t
 ## Examples
 Following examples use `-r` (regular expression) and `-p` (regex group number where IP is present)
 
-### Automaitc drop SSH Brute Force
+### Automatic drop SSH Brute Force
 i use this script for automatic response against SSH brute force, and for block Nmap SYN/TCP scan. The first example relates SSH logs, with a regular expression that search for failed login:
 ```
 ./log2iptables.sh -x 1 -f /var/log/auth.log -r "sshd.*(f|F)ail.*(\=| )([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})" -p 3 -l 5
@@ -221,10 +221,10 @@ Obviously, here the output is more verbose.
 
 
 ### Nginx drop scan / bot
-Easy way to automatic drop bot or web scan, reading http access log.
-I've a nginx server that store all logs in `/usr/local/nginx/logs/example.com.access`.
-My website is not a Drupal or Wordpress installation, but i receive daily requests for
-pages like: wp-login, wp-admin, install.php, xmlrpc.php, etc... that does not exists (404).
+An easy way to automatic drop bot or web scan, reading http access log.
+I have an Nginx server that stores all logs in `/usr/local/nginx/logs/example.com.access`.
+My website is not a Drupal or Wordpress installation, but I receive daily requests for
+pages like `wp-login`, `wp-admin`, `install.php`, `xmlrpc.php` and so on that don't exist (404).
 With log2iptables i can drop it by runing:
 ```bash
 ./log2iptables.sh -x 1 -f /usr/local/nginx/logs/example.com.access -r "([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+) .*GET \/(wp\-|admin|install|setup|xmlrpc).* 404 " -p 1 -l 1
@@ -248,7 +248,7 @@ run log2iptables with the `-m <mail to>` and `-M <mail from>` parameters. For ex
 
 ## Execute command after iptables run
 When log2iptables add new iptables rules, can execute a command.
-You can specify the command with argument -X and you can choose
+You can specify the command with argument `-X` and you can choose
 how to format the ip address list using IPLISTCSV or IPLIST PIPE.
 For example:
 ```
@@ -271,7 +271,7 @@ Executing Command: echo IPLISTCSV
 
 Done.
 ```
-This is useful if you have to send this information to others applications
+The above is useful if you have to send this information to others applications
 like IPS or Firewall API, WAF API, etc...
 
 
@@ -292,9 +292,9 @@ Array (
 ```
 
 ## Use Telegram Bot
-Now you can send a text message to your phone, using Telegram, when log2iptables execute the iptables command. This is possible by using the Telegram Bot API. For more information see https://core.telegram.org/bots/api or this useful tutorial http://unnikked.ga/getting-started-with-telegram-bots/ on how to get a bot Token.
+Now you can send a text message to your phone, using Telegram, when log2iptables execute the iptables command. It is possible by using the Telegram Bot API. For more information see https://core.telegram.org/bots/api or this useful tutorial http://unnikked.ga/getting-started-with-telegram-bots/ on how to get a bot Token.
 
-Anyway, i've created a new Telegram Bot just visiting https://telegram.me/botfather and then i've open a chat with my bot. Then i've get the Chat ID with curl, like this:
+I have created a new Telegram Bot. Visit https://telegram.me/botfather and open a chat with it. Then, get the Chat ID with curl, like this:
 ```bash
 curl "https://api.telegram.org/bot<token>/getUpdates"
 
